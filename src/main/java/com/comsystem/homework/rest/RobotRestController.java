@@ -1,14 +1,13 @@
 package com.comsystem.homework.rest;
 
+import com.comsystem.homework.exception.IllegalExcavationDaysException;
+import com.comsystem.homework.exception.IllegalNumberOfStonesException;
 import com.comsystem.homework.model.RobotPlan;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.ErrorResponseException;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.comsystem.homework.robot.RobotOperations;
+
+import java.util.Optional;
 
 @RestController()
 @RequestMapping("/api/v1/robot/operation")
@@ -19,8 +18,16 @@ public final class RobotRestController {
      */
     @PostMapping("/excavation")
     public ResponseEntity<RobotPlan> excavateStones(@RequestParam Integer numberOfDays) {
-        // TODO
-        throw new ErrorResponseException(HttpStatus.I_AM_A_TEAPOT);
+        // Return an error on invalid parameter value.
+        if (numberOfDays <= 0 || numberOfDays > 31) {
+            String errorMessage = String.format(
+                    "Cannot handle excavation for %d days. Supported duration is from 1 to 31 days.",
+                    numberOfDays
+            );
+            throw new IllegalExcavationDaysException(errorMessage);
+        }
+        RobotOperations robotOperations = new RobotOperations();
+        return ResponseEntity.of(Optional.of(robotOperations.excavateStonesForDays(numberOfDays)));
     }
 
     /**
@@ -28,8 +35,15 @@ public final class RobotRestController {
      */
     @PostMapping("/approximation")
     public ResponseEntity<RobotPlan> approximateDays(@RequestParam Integer numberOfStones) {
-        // TODO
-        throw new ErrorResponseException(HttpStatus.I_AM_A_TEAPOT);
+        // Return an error on invalid parameter value.
+        if (numberOfStones <= 0) {
+            String errorMessage = String.format(
+                    "Cannot collect %d stones. Number of stones must be positive.",
+                    numberOfStones
+            );
+            throw new IllegalNumberOfStonesException(errorMessage);
+        }
+        RobotOperations robotOperations = new RobotOperations();
+        return ResponseEntity.of(Optional.of(robotOperations.daysRequiredToCollectStones(numberOfStones)));
     }
-
 }
